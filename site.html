@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>WebRemote</title>
+<style type="text/css">
+body {
+height:100%;
+width:100%;
+}
+.content {
+width:250px;
+margin: 0px auto;
+}
+.pad {
+width:232px;
+height:230px;
+border:3px solid black;
+margin-bottom: 5px;
+}
+.buttons {
+float:none;
+height:32px;
+margin-bottom:5px;
+}
+.btn {
+float:left;
+width:100px;
+height:30px;
+border:1px solid black;
+background-color: gray;
+text-align: center;
+vertical-align: middle;
+margin-right:2px
+}
+.btn.mini {
+width:30px;
+margin-right:0px;
+border-right:0px;
+}
+</style>
+</head>
+<body>
+<div class="content" style="display: block">
+    <div class="buttons">
+        <div class="btn" id="BTN_VT2">XBMC</div>
+        <div class="btn" id="BTN_VT3">Firefox</div>
+        <div class="btn mini" id="BTN_VT3">G</div>
+    </div>
+    <div class="pad"></div>
+    <div class="buttons">
+        <div class="btn mini" id="BTN_LEFT_DOUBLE">D</div>
+        <div class="btn" id="BTN_LEFT">Left</div>
+<!--        <div class="btn mini" id="BTN_LEFT_DOWN">H</div>
+        <div class="btn mini" id="BTN_LEFT_UP">H</div>-->
+        <div class="btn" id="BTN_RIGHT">Right</div>
+    </div>
+</div>
+<div style="display: block">
+Copyright by me (2013).
+</div>
+<script src="jquery-1.9.1.min.js"></script>
+<script src="jquery.event.move.js"></script>
+<script language="javascript">
+$.WebRemote = {
+    parallels: 3,
+    move: 0,
+    moveX: 0,
+    moveY: 0
+}
+function send(m,cb) {
+    if (uinputsocket) {
+        console.log(m);
+        uinputsocket.send(m);
+    } else {
+        $.WebRemote.move++;
+        $.get(m,function() {$.WebRemote.move--;});
+    }
+}
+
+function moveit(e) {
+    if ($.WebRemote.move < $.WebRemote.parallels) {
+        send('/move/'+($.WebRemote.moveX+e.deltaX)+'/'+($.WebRemote.moveY+e.deltaY));
+        $.WebRemote.moveX = 0;
+        $.WebRemote.moveY = 0;
+    } else {
+        $.WebRemote.moveX += e.deltaX;
+        $.WebRemote.moveY += e.deltaY;
+    }
+}
+$(".pad")
+    .bind("movestart", moveit)
+    .bind("move", moveit)
+    .bind("moveend", moveit);
+$(".btn").click(function(e) {
+    send('/btn/'+ $(this).attr('id'));
+});
+//$(".pad").click(function(e) {
+//    send('/btn/BTN_LEFT');
+//});
+</script>
+<script language="javascript">
+var uinputsocket = false;
+try {
+    //uinputsocket = new WebSocket("ws://localhost:8880/ws");
+    //uinputsocket.onmessage = function(e) {
+    //    console.log(e.data);
+    //};
+    //uinputsocket.onerror = function(e) {uinputsocket=false;};
+    //uinputsocket.onclose = uinputsocket.onerror;
+} catch (e) {
+    console.log(e);
+    uinputsocket = false;
+}
+//uinputsocket.send("hallo\n");
+</script>
+</body>
+</html>
